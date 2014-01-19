@@ -42,19 +42,18 @@ def virtualenv():
     """ Install new virtualenv. """
     fabtools.require.python.virtualenv(VENV_PATH)
     with fabtools.python.virtualenv(VENV_PATH):
-        # curdling is faster than pip
         requirements = os.path.join(env.work_dir, "requirements.txt")
-        run("easy_install curdling ; curd install -r %s" % requirements)
+        fabtools.python.install_requirements(requirements)
     execute(virtualenv_dev)
 
 
 @task
 @roles("local")
 def virtualenv_dev():
-    """ Install dev packages. """
+    """ Install dev python  packages. """
     with fabtools.python.virtualenv(VENV_PATH):
         requirements = os.path.join(env.work_dir, "dev-requirements.txt")
-        run("curd install -r %s" % requirements)
+        fabtools.python.install_requirements(requirements)
 
 
 @task
@@ -118,23 +117,22 @@ def deploy():
 @task
 def system_packages():
     """ Install required packages (+extras). """
-    fabtools.deb.update_index(quiet=False)
     fabtools.require.deb.nopackages([
         'apache2.2-common',
     ])
     fabtools.require.deb.packages([
         'build-essential',
         'curl',
-        'imagemagick',
-        'libjpeg-dev',
-        'zlib1g-dev',
-        'libfreetype6-dev',
-        'libevent-dev',
         'python-dev',
+        'python-pip',
         'git-core',
         'nginx',
         'redis-server',
     ])
+    fabtools.require.python.packages([
+        'virtualenv',
+        'virtualenvwrapper',
+    ], use_sudo=True)
 
 
 @task
