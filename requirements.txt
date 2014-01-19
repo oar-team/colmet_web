@@ -1,8 +1,10 @@
-arrow
 Flask
-Flask-Assets
 Flask-Cache
 Flask-Script
+pandas
+vincent
+arrow
 Unidecode
 redis
 gevent
+
