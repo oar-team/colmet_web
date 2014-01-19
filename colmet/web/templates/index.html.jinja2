@@ -1,0 +1,12 @@
+{% extends "layout.jinja2" %}
+
+{% block title %}{{ config.SITE_DESCRIPTION }}{% endblock title %}
+{% block subtitle %}{{ config.SITE_TITLE }} - {% endblock subtitle %}
+{% block head %}
+{{ super() }}
+{% endblock head %}
+
+
+{% block content %}
+<p><strong>Hello</strong>, {{ name.title() }} !</p>
+{% endblock content %}

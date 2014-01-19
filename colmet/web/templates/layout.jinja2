@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="content-type" />
+<title>{% block subtitle %}{% endblock subtitle %}{% block title %}{{ config.SITE_TITLE }} {% endblock title %}</title>
+<meta name="description" content="{% block description %}{{ config.SITE_DESCRIPTION }}{% endblock description %}" />
+<meta name="author" content="Salem Harrache" />
+{% block head %}
+{% endblock head %}
+</head>
+
+<body>
+{% block body %}
+  <div class="shadow">
+    <header>
+    </header>
+
+    <div id="nav">
+    </div>
+
+    <div id="wrapper">
+        <section class="left">
+        </section>
+        <section>
+          {% block content %}{% endblock content %}
+        </section>
+    </div>
+  </div>
+</body>
+{% endblock body %}
+</html>
