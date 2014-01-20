@@ -1,14 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from __future__ import division, unicode_literals
-import pprint
 import os
 from werkzeug.contrib.fixers import ProxyFix
 from gevent.wsgi import WSGIServer
 
 from flask import current_app
 from flask.ext.script import Manager
-from flask.ext.script.commands import ShowUrls, Clean
+from flask.ext.script.commands import ShowUrls
 
 from colmet.web.app import app, configure_app
 from colmet.web.extensions import cache
@@ -23,18 +22,11 @@ def init_app_hadler(config=None):
 
 manager = Manager(init_app_hadler)
 manager.add_command("urls", ShowUrls())
-manager.add_command("clean", Clean())
 
 
 @manager.command
 def clear_cache():
     cache.cache.clear()
-
-
-@manager.command
-def dumpconfig():
-    "Dumps config"
-    pprint.pprint(current_app.config)
 
 
 @manager.shell
