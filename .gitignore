@@ -27,3 +27,6 @@ pip-log.txt
 .vagrant
 # Virtualenv
 env
+
+#HDF5
+*.hdf5
