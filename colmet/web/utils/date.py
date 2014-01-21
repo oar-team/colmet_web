@@ -25,3 +25,10 @@ def datetime_format(datetime, pattern="EEEE dd MMMM yyyy - HH'h'mm",
                     humanize=False):
     """Date (with time) formatter"""
     return format_date(datetime, pattern=pattern, humanize=humanize)
+
+
+def to_datetime(s):
+    a = arrow.get(date).to('utc').to(current_app.config['TIMEZONE'])
+    locale = current_app.config['LOCALE']
+    import ipdb; ipdb.set_trace()
+    return locale

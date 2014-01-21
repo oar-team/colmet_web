@@ -8,5 +8,17 @@
 
 
 {% block content %}
-<p><strong>Hello</strong>, {{ name.title() }} !</p>
+<h2>Test : Job0/frog138</h2>
+<div id="vis"></div>
 {% endblock content %}
+
+
+{% block footer %}
+<script type="text/javascript">
+// parse a spec and create a visualization view
+function parse(spec) {
+  vg.parse.spec(spec, function(chart) { chart({el:"#vis"}).update(); });
+}
+parse("{{ url_for('frontend.vega_json') }}");
+</script>
+{% endblock footer %}

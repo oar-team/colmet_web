@@ -31,3 +31,6 @@ class DefaultConfig(object):
 
     # Acces point
     FILESYSTEM_PREFIX = os.path.join(os.path.dirname(__file__))
+
+    # HDF5
+    HDF5_PATH = "/tmp/colmet.hdf5"

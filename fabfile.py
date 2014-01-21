@@ -29,17 +29,6 @@ if not env.roles:
 
 
 @task
-def virtualenv():
-    """ Install new virtualenv. """
-    fabtools.require.python.virtualenv(VENV_PATH)
-    with fabtools.python.virtualenv(VENV_PATH):
-        requirements = os.path.join(env.work_dir, "requirements.txt")
-        dev_requirements = os.path.join(env.work_dir, "dev-requirements.txt")
-        fabtools.python.install_requirements(requirements)
-        fabtools.python.install_requirements(dev_requirements)
-
-
-@task
 def upgrade():
     """ Upgrades virtualenv."""
     with fabtools.python.virtualenv(VENV_PATH):
@@ -90,7 +79,7 @@ def deploy():
 
 
 @task
-def system_packages():
+def requirements():
     """ Install required packages (+extras). """
     fabtools.require.deb.nopackages([
         'apache2.2-common',
@@ -104,11 +93,13 @@ def system_packages():
         'nginx',
         'redis-server',
         'libevent-dev',  # for gevent
+        'python-tables',  # Read HDF-5
+        'supervisor'
     ])
-    fabtools.require.python.packages([
-        'virtualenv',
-        'virtualenvwrapper',
-    ], use_sudo=True)
+    requirements = os.path.join(env.work_dir, "requirements.txt")
+    dev_requirements = os.path.join(env.work_dir, "dev-requirements.txt")
+    fabtools.require.python.requirements(requirements, use_sudo=True)
+    fabtools.require.python.requirements(dev_requirements, use_sudo=True)
 
 
 @task
@@ -145,7 +136,6 @@ CACHE_REDIS_HOST = "localhost"
 @task
 def bootstrap():
     """ Bootstrap. """
-    execute(system_packages)
+    execute(requirements)
     execute(configure_nginx)
     execute(configure_supervisor)
-    execute(virtualenv)

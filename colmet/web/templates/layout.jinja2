@@ -6,6 +6,10 @@
 <meta name="description" content="{% block description %}{{ config.SITE_DESCRIPTION }}{% endblock description %}" />
 <meta name="author" content="Salem Harrache" />
 {% block head %}
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<script src="http://d3js.org/topojson.v1.min.js"></script>
+<script src="http://d3js.org/d3.geo.projection.v0.min.js" charset="utf-8"></script>
+<script src="http://trifacta.github.com/vega/vega.js"></script>
 {% endblock head %}
 </head>
 
@@ -22,10 +26,12 @@
         <section class="left">
         </section>
         <section>
-          {% block content %}{% endblock content %}
+          {% block content %}<div id="vis"></div>{% endblock content %}
         </section>
     </div>
   </div>
 </body>
 {% endblock body %}
+{% block footer %}
+{% endblock footer %}
 </html>
