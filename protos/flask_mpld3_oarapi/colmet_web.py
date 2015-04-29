@@ -26,6 +26,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 import mpld3
 import json
+import zlib
 import requests
 import sys,os,time,re
 from distutils.version import StrictVersion as version
@@ -68,6 +69,23 @@ def get(uri,cache_file,cache_delay):
             os.chmod(cache_file, 0666)
     return data
 
+def get_jobs():
+    """
+        Get the current jobs list from the OAR API
+    """
+    return get('/jobs/details',CACHING_JOBS_FILE,CACHING_JOBS_DELAY)["items"]
+
+def get_job_metrics(id):
+    """
+        Get colmet metrics for a given job
+    """
+    headers = {'Accept': 'application/x-gzip'}
+    r = requests.get(APIURI+"/colmet/job/"+str(id),headers=headers)
+    if r.status_code != 200:
+        print ("Could not get colmet data for job "+str(id))
+        r.raise_for_status()
+    return json.loads(zlib.decompress(r.content,zlib.MAX_WBITS|32))
+
 
 def compute_cumul(data):
     """
@@ -94,12 +112,6 @@ def compute_cumul(data):
         v_prev=value
     return out_data
 
-
-def get_jobs():
-    """
-        Get the current jobs list from the OAR API
-    """
-    return get('/jobs/details',CACHING_JOBS_FILE,CACHING_JOBS_DELAY)["items"]
 
 # Routes
 
@@ -137,30 +149,35 @@ def graph_job():
     #f.close
     ##############################################
 
+    metrics=get_job_metrics(id)
+
     # Set the origin timestamp
-    origin=metrics[0][0]
+    origin=metrics['timestamp'][0]
     # Get a list of uniq hosts
-    hosts = set([a[1] for a in metrics])
+    hosts = set(metrics['hostname'])
     # For each host
     for host in hosts:
+      # Prepare host and timestamp filter
+      def filter(idx):
+        return metrics['hostname'][idx] == host and t_min < metrics['timestamp'][idx]-origin < t_max
       # X axis is a number of seconds starting at 0
-      x=[ a[0] for a in metrics if a[1] == host and t_min < a[0]-origin < t_max ]
+      x=[ a for idx,a in enumerate(metrics['timestamp']) if filter(idx) ]
       x0=x[0]
       x=[ (a - x0) for a in x ]
       # Cpu
-      y_cpu=[ 1.0*a[3]/a[2]/1000 for a in metrics if a[1] == host and t_min < a[0]-origin < t_max ]
+      y_cpu=[ 1.0*a/metrics['ac_etime'][idx]/1000 for idx,a in enumerate(metrics['cpu_run_real_total']) if filter(idx) ]
       graph['cpu'].plot(x,y_cpu,label=host,lw=5,alpha=0.4)
       # Memory
-      y_mem={ a[2]: 1.0*a[4]/1024 for a in metrics if a[1] == host and t_min < a[0]-origin < t_max }
+      y_mem={ metrics['ac_etime'][idx]: 1.0*a/1024 for idx,a in enumerate(metrics['coremem']) if filter(idx) }
       y_mem=compute_cumul(y_mem)
       graph['mem'].plot(x,y_mem,label=host,lw=5,alpha=0.4)
       graph['mem'].set_ylabel('rss (GBytes)')
       # Read/Write
-      y_read={ a[0]: 1.0*a[5]/1024/1024 for a in metrics if a[1] == host and t_min < a[0]-origin < t_max }
+      y_read={ metrics['timestamp'][idx]: 1.0*a/1024/1024 for idx,a in enumerate(metrics['read_bytes']) if filter(idx) }
       y_read=compute_cumul(y_read)
       graph['read'].plot(x,y_read,label=host,lw=5,alpha=0.4)
       graph['read'].set_ylabel('Read (MBytes/s)')
-      y_write={ a[0]: 1.0*a[6]/1024/1024 for a in metrics if a[1] == host and t_min < a[0]-origin < t_max }
+      y_write={ metrics['timestamp'][idx]: 1.0*a/1024/1024 for idx,a in enumerate(metrics['write_bytes']) if filter(idx) }
       y_write=compute_cumul(y_write)
       graph['write'].plot(x,y_write,label=host,lw=5,alpha=0.4)
       graph['write'].set_ylabel('Write (MBytes/s)')
