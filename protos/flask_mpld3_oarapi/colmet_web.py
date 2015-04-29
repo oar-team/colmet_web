@@ -18,7 +18,7 @@ CACHING_JOBS_DELAY=120
 ####################################################################
 from flask import Flask
 app = Flask(__name__)
-from flask import request,render_template,url_for,abort,redirect
+from flask import request,render_template,url_for,abort,redirect,make_response
 import sys
 import h5py
 import numpy as np
@@ -75,7 +75,7 @@ def get_jobs():
     """
     return get('/jobs/details',CACHING_JOBS_FILE,CACHING_JOBS_DELAY)["items"]
 
-def get_job_metrics(id):
+def get_job_metrics(id,raw=0):
     """
         Get colmet metrics for a given job
     """
@@ -84,7 +84,10 @@ def get_job_metrics(id):
     if r.status_code != 200:
         print ("Could not get colmet data for job "+str(id))
         r.raise_for_status()
-    return json.loads(zlib.decompress(r.content,zlib.MAX_WBITS|32))
+    if raw==1:
+      return r.content
+    else:
+      return json.loads(zlib.decompress(r.content,zlib.MAX_WBITS|32))
 
 
 def compute_cumul(data):
@@ -149,6 +152,18 @@ def graph_job():
     t_min=int(request.args.get('t_min', '0'))
     t_max=int(request.args.get('t_max', '7200'))
     total_points=int(request.args.get('resolution', '500'))
+    type=request.args.get('type', 'graph')
+
+    # Return raw data (extract only)
+    if type == "extract":
+        metrics=get_job_metrics(id,1)
+        response = make_response()
+        response.headers['Content-type']='application/json' 
+        response.headers['Content-Encoding']='gzip'
+        response.headers['Content-Disposition']='attachment'
+        response.data=metrics
+        return response
+
     # Prepare graphs
     fig={}
     graph={}
