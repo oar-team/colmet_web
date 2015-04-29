@@ -168,7 +168,7 @@ def graph_job():
         response = make_response()
         response.headers['Content-type']='application/json' 
         response.headers['Content-Encoding']='gzip'
-        response.headers['Content-Disposition']='attachment'
+        response.headers['Content-Disposition']='attachment; filename="'+str(id)+'.json"'
         response.data=metrics
         return response
 
