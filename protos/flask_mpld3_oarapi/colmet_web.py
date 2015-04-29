@@ -112,7 +112,20 @@ def compute_cumul(data):
         v_prev=value
     return out_data
 
-
+def reduce(data,size,mode):
+    """
+        Reduces a list to a floating average if mode=0, or the middle value if mode=1
+        The size parameter is the final length of the list
+    """
+    chunk_size=int(len(data)/size)
+    if mode == 0:
+      convol_list=[ 1.0/chunk_size for i in range(0,chunk_size) ]
+    else:
+      convol_list=[ 0 for i in range(0,chunk_size/2) ]
+      convol_list.append(1)
+      convol_list.extend([ 0 for i in range(chunk_size/2,chunk_size-1) ])
+    return np.convolve(data,convol_list,mode='valid')[::chunk_size]  
+ 
 # Routes
 
 @app.route('/')
@@ -126,7 +139,7 @@ def form_job():
     id=request.args.get('id', '')
     begin=request.args.get('begin', '')
     end=request.args.get('end', '')
-    return render_template('form_job.html',cluster_name=cluster_name,def_id=id,def_begin=begin,def_end=end)
+    return render_template('form_job.html',cluster_name=cluster_name,def_id=id,def_begin=begin,def_end=end,def_res=500)
 
 # Cpu/mem/io graphs
 @app.route('/graph/job')
@@ -135,6 +148,7 @@ def graph_job():
     id=int(request.args.get('id', '0'))
     t_min=int(request.args.get('t_min', '0'))
     t_max=int(request.args.get('t_max', '7200'))
+    total_points=int(request.args.get('resolution', '500'))
     # Prepare graphs
     fig={}
     graph={}
@@ -164,21 +178,26 @@ def graph_job():
       x=[ a for idx,a in enumerate(metrics['timestamp']) if filter(idx) ]
       x0=x[0]
       x=[ (a - x0) for a in x ]
+      x=reduce(x,total_points,1)
       # Cpu
       y_cpu=[ 1.0*a/metrics['ac_etime'][idx]/1000 for idx,a in enumerate(metrics['cpu_run_real_total']) if filter(idx) ]
+      y_cpu=reduce(y_cpu,total_points,0)
       graph['cpu'].plot(x,y_cpu,label=host,lw=5,alpha=0.4)
       # Memory
       y_mem={ metrics['ac_etime'][idx]: 1.0*a/1024 for idx,a in enumerate(metrics['coremem']) if filter(idx) }
       y_mem=compute_cumul(y_mem)
+      y_mem=reduce(y_mem,total_points,0)
       graph['mem'].plot(x,y_mem,label=host,lw=5,alpha=0.4)
       graph['mem'].set_ylabel('rss (GBytes)')
       # Read/Write
       y_read={ metrics['timestamp'][idx]: 1.0*a/1024/1024 for idx,a in enumerate(metrics['read_bytes']) if filter(idx) }
       y_read=compute_cumul(y_read)
+      y_read=reduce(y_read,total_points,0)
       graph['read'].plot(x,y_read,label=host,lw=5,alpha=0.4)
       graph['read'].set_ylabel('Read (MBytes/s)')
       y_write={ metrics['timestamp'][idx]: 1.0*a/1024/1024 for idx,a in enumerate(metrics['write_bytes']) if filter(idx) }
       y_write=compute_cumul(y_write)
+      y_write=reduce(y_write,total_points,0)
       graph['write'].plot(x,y_write,label=host,lw=5,alpha=0.4)
       graph['write'].set_ylabel('Write (MBytes/s)')
     # Print a legend and generate html
