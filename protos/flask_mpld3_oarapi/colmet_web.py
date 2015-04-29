@@ -149,8 +149,16 @@ def form_job():
 def graph_job():
     # Read parameters
     id=int(request.args.get('id', '0'))
-    t_min=int(request.args.get('t_min', '0'))
-    t_max=int(request.args.get('t_max', '7200'))
+    t_min=request.args.get('t_min', '0')
+    if t_min == '':
+        t_min=0
+    else:
+        t_min=int(t_min)
+    t_max=request.args.get('t_max', '7200')
+    if t_max=='':
+       t_max=7200
+    else:
+       t_max=int(t_max)
     total_points=int(request.args.get('resolution', '500'))
     type=request.args.get('type', 'graph')
 
