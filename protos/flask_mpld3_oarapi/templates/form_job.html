@@ -1,4 +1,11 @@
-<h2>Colmet OAR job data extraction</h2>
+{% extends "layout.html" %}
+
+{% block title %}Job form{% endblock %}
+
+{% block content %}
+<CENTER>
+<BR>
+<h4>Colmet OAR job data extraction</h4>
 <FORM ACTION=../graph/job METHOD=GET>
 <TABLE>
 <TR><TD>Job ID:</TD><TD><INPUT TYPE=text SIZE=10 NAME=id VALUE="{{def_id}}"></TD></TR>
@@ -15,3 +22,6 @@
 <TR><TD COLSPAN=2><CENTER><INPUT TYPE=submit NAME=ok VALUE=GO></CENTER></TD></TD></TR>
 </TABLE>
 </FORM>
+</CENTER>
+
+{% endblock %}

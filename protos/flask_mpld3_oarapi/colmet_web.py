@@ -7,13 +7,14 @@
 #     Point a browser to http://localhost:5000
 #
 
+
 APIURI="http://localhost/oarapi"
 APILIMIT="1000"
 cluster_name="Froggy"
 CACHING=True
 CACHING_JOBS_FILE="/scratch/chandler.jobs.cache"
 CACHING_JOBS_DELAY=120
-
+SCRIPT_NAME="/clusters/froggy_colmet"
 
 ####################################################################
 from flask import Flask
@@ -33,6 +34,15 @@ from distutils.version import StrictVersion as version
 
 matplotlib.use('Agg')
 
+class FixScriptName(object):
+     def __init__(self, app):
+         self.app = app
+
+     def __call__(self, environ, start_response):
+         environ['SCRIPT_NAME']=SCRIPT_NAME
+         return self.app(environ, start_response)
+
+app.wsgi_app = FixScriptName(app.wsgi_app)
 
 # Functions
 def get_from_api(uri):
@@ -133,9 +143,7 @@ def reduce(data,size,mode):
 
 @app.route('/')
 def index():
-    jobs=get_jobs()
-    jobs=[ j for j in jobs if j["state"]=="Running" ]
-    return render_template('index.html',cluster_name=cluster_name,jobs=jobs,now=int(time.time()))
+    return render_template('index.html',cluster_name=cluster_name)
 
 @app.route('/form/job')
 def form_job():
@@ -143,6 +151,12 @@ def form_job():
     begin=request.args.get('begin', '')
     end=request.args.get('end', '')
     return render_template('form_job.html',cluster_name=cluster_name,def_id=id,def_begin=begin,def_end=end,def_res=500)
+
+@app.route('/running_jobs')
+def running_jobs():
+    jobs=get_jobs()
+    jobs=[ j for j in jobs if j["state"]=="Running" ]
+    return render_template('running_jobs.html',cluster_name=cluster_name,jobs=jobs,now=int(time.time()))
 
 # Cpu/mem/io graphs
 @app.route('/graph/job')
@@ -176,7 +190,7 @@ def graph_job():
     fig={}
     graph={}
     for g in [ 'cpu','mem','read','write']:
-        fig[g] = plt.figure(figsize=(9,5))
+        fig[g] = plt.figure(figsize=(5,3))
         graph[g] = fig[g].add_subplot(111)
 
     # Load the metrics
@@ -226,13 +240,14 @@ def graph_job():
     # Print a legend and generate html
     html={}
     for g in [ 'cpu','mem','read','write']:
-        graph[g].legend()
+        graph[g].legend(prop={'size':9})
         graph[g].grid(color='lightgray', alpha=0.7)
         graph[g].set_xlabel('time (s)')
         html[g]=mpld3.fig_to_html(fig[g])
     # Rendering 
     plt.close("all")
     return render_template('show_job_graphs.html', graph=html)
+
 
 if __name__ == '__main__':
     app.run(debug=True,host='0.0.0.0')

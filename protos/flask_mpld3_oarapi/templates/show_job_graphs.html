@@ -1,5 +1,9 @@
-<!doctype html>
-<title>Job graphs</title>
+{% extends "layout.html" %}
+
+{% block title %}Graphs{% endblock %}
+
+{% block content %}
+
 <table>
 <tr>
 <td><b>CPU USAGE</b><br>
@@ -13,3 +17,5 @@
 {{graph['write']|safe}}</td>
 </tr>
 </table>
+
+{% endblock %}

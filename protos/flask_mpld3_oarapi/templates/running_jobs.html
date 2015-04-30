@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+
+{% block title %}Running jobs selection{% endblock %}
+
+{% block content %}
+<P>
+Select a current running jobs:
+<P>
+<UL>
+{% for job in jobs|sort %}
+  {% if job['stop_time'] == 0 %}
+    {% set end=now-job['start_time'] %}
+  {% else %}
+    {% set end=job['start_time'] %}
+  {% endif %}
+  {% set end_h=end/3600 %}
+  
+  <li><a href=form/job?id={{job['id']}}&begin=0&end={{end}}>{{job['id']}}</a> ({{job['owner']}}, {{job['resources']|length}} resources, {{end_h|round(1, 'floor')}} hours)
+{% endfor %}
+</UL>
+
+{% endblock %}

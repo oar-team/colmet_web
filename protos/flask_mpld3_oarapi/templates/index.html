@@ -1,20 +1,20 @@
-<h1>Welcome to experimental OAR/Colmet jobs monitoring on {{cluster_name}}</h1>
+{% extends "layout.html" %}
 
+{% block title %}Index{% endblock %}
 
-<a href=form/job>Click here to graph a {{cluster_name}} job if you know the id</a>
+{% block content %}
+<br>
+<h3>
+<center>
+  Welcome to the experimental OAR/Colmet
+  <br>jobs monitoring on {{cluster_name}}
+</center>
+</h3>
+<br><br>
+<ul>
+<li><a href=form/job>Graph or extract a {{cluster_name}} job if you know the id</a>
+<p>
+<li><a href=running_jobs>Or select in the list of running job</a>
+</ul>
 
-<P>
-Or choose from the current running jobs:
-<P>
-<UL>
-{% for job in jobs|sort %}
-  {% if job['stop_time'] == 0 %}
-    {% set end=now-job['start_time'] %}
-  {% else %}
-    {% set end=job['start_time'] %}
-  {% endif %}
-  {% set end_h=end/3600 %}
-  
-  <li><a href=form/job?id={{job['id']}}&begin=0&end={{end}}>{{job['id']}}</a> ({{job['owner']}}, {{job['resources']|length}} resources, {{end_h|round(1, 'floor')}} hours)
-{% endfor %}
-</UL>
+{% endblock %}

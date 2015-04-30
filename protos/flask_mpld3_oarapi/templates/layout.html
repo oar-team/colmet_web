@@ -1,0 +1,33 @@
+<html>
+<head>
+  {% block head %}
+  <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='colmet.css')}}">
+  <title>{% block title %}{% endblock %} - OAR/Colmet</title>
+  {% endblock %}
+</head>
+
+<body>
+
+<div id="top_menu">
+  <IMG ALIGN=RIGHT SRC={{url_for('static', filename='oar.png')}} WIDTH=100>
+  <br><a href={{url_for('index')}}>OAR/COLMET</a> 
+</div>
+<div id="body">
+  {% block content %}
+  {% endblock %}
+</div> 
+<br>
+<div id="foot">
+  {% block foot %}
+  <center>
+      <table width=800 align=center><tr><td align=center>
+      <a href=http://oar.imag.fr>oar.imag.fr</a><br>
+      <a href=https://github.com/oar-team/colmet>github.com/oar-team/colmet</a>
+      </td></tr></table>
+  </center>
+  {% endblock %}
+</div>
+
+
+</body>
+</html>
