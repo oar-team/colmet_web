@@ -165,6 +165,7 @@ def running_jobs():
 def graph_job():
     # Read parameters
     id=int(request.args.get('id', '0'))
+    custom_title=request.args.get('custom_title', '')
     t_min=request.args.get('t_min', '0')
     if t_min == '':
         t_min=0
@@ -248,7 +249,7 @@ def graph_job():
         html[g]=mpld3.fig_to_html(fig[g])
     # Rendering 
     plt.close("all")
-    return render_template('show_job_graphs.html', graph=html)
+    return render_template('show_job_graphs.html', graph=html,job_id=id,custom_title=custom_title)
 
 
 if __name__ == '__main__':
