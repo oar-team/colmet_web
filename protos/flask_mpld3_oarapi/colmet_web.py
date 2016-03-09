@@ -52,7 +52,7 @@ def get_from_api(uri):
     headers = {'Accept': 'application/json'}
     r = requests.get(APIURI+uri+"?limit="+APILIMIT,headers=headers)
     if r.status_code != 200:
-        print ("Could not get "+APIURI+uri)
+        print ("Could not get "+APIURI+uri+": "+r.text)
         r.raise_for_status()
     if version(requests.__version__) >= version("2.0.0"):
         return r.json()
@@ -92,7 +92,7 @@ def get_job_metrics(id,raw=0):
     headers = {'Accept': 'application/x-gzip'}
     r = requests.get(APIURI+"/colmet/job/"+str(id),headers=headers)
     if r.status_code != 200:
-        print ("Could not get colmet data for job "+str(id))
+        print ("Could not get colmet data for job "+str(id)+": "+r.text)
         r.raise_for_status()
     if raw==1:
       return r.content
@@ -131,6 +131,8 @@ def reduce(data,size,mode):
         The size parameter is the final length of the list
     """
     chunk_size=int(len(data)/size)
+    if chunk_size == 0:
+      chunk_size = 1
     if mode == 0:
       convol_list=[ 1.0/chunk_size for i in range(0,chunk_size) ]
     else:
@@ -250,4 +252,4 @@ def graph_job():
 
 
 if __name__ == '__main__':
-    app.run(debug=True,host='0.0.0.0')
+    app.run(debug=False,host='0.0.0.0',port=5000)
